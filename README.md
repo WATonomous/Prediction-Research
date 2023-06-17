@@ -1,10 +1,7 @@
-# Perception Research
-This repository is used as a playground to run perception experiments. Each of these are containerized through Docker. Current projects include 
-- Using transfer learning with the YOLOv5 model (by freezing backbone layers) to perform traffic sign detection
-- Synthetic Data Generation for Traffic Signs using CARLA
-- Multimodal Object Deteciton with BEVFusion
+# Prediction Research
+This repository is used as a playground to run prediction experiments. Each of these are containerized through Docker. 
 
-**Pre-requisite**: Before you run any of the commands below, make sure you are familiar with [Docker](https://www.docker.com/). If not, we highly recommend going through this [2-hour video](https://www.youtube.com/watch?v=fqMOX6JJhGo) which teaches you the basics of Docker.
+**Pre-requisite**: Before you run any of the commands below, make sure you are familiar with [Docker](https://www.docker.com/). If not, we recommend going through this [2-hour video](https://www.youtube.com/watch?v=fqMOX6JJhGo) which teaches you the basics of Docker.
 
 ## Getting Started
 To get started, run the following script to setup some environment variables
