@@ -9,16 +9,17 @@ import math
 import os
 import train_eval.utils as u
 
+import wandb
+
 
 # Initialize device:
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 
 class Trainer:
     """
     Trainer class for running train-val loops
     """
-    def __init__(self, cfg: Dict, data_root: str, data_dir: str, checkpoint_path=None, just_weights=False, writer=None):
+    def __init__(self, cfg: Dict, data_root: str, data_dir: str, checkpoint_path=None, just_weights=False):
         """
         Initialize trainer object
         :param cfg: Configuration parameters
@@ -26,8 +27,20 @@ class Trainer:
         :param data_dir: Directory with extracted, pre-processed data
         :param checkpoint_path: Path to checkpoint with trained weights
         :param just_weights: Load just weights from checkpoint
-        :param writer: Tensorboard summary writer
         """
+
+        # Intialize wandb
+        wandb.init(
+            project="prediction-pgp",
+            name=cfg.experiment_name,
+            config=cfg
+        )
+        # I define a custom step here because global step can get confusing
+        # once we begin to log alot of metrics
+        wandb.define_metric("train_step")
+        wandb.define_metric("train/*", step_metric="train_step")
+        wandb.define_metric("val/*", step_metric="train_step")
+        self.training_iter = 0
 
         # Initialize datasets:
         ds_type = cfg['dataset'] + '_' + cfg['agent_setting'] + '_' + cfg['input_representation']
@@ -70,10 +83,6 @@ class Trainer:
         # Print metrics after these many minibatches to keep track of training
         self.log_period = len(self.tr_dl)//cfg['log_freq']
 
-        # Initialize tensorboard writer
-        self.writer = writer
-        self.tb_iters = 0
-
         # Load checkpoint if checkpoint path is provided
         if checkpoint_path is not None:
             print()
@@ -92,7 +101,7 @@ class Trainer:
         """
         Main function to train model
         :param num_epochs: Number of epochs to run training for
-        :param output_dir: Output directory to store tensorboard logs and checkpoints
+        :param output_dir: Output directory to store wandb logs and checkpoints
         :return:
         """
 
@@ -165,17 +174,17 @@ class Trainer:
             minibatch_metrics, epoch_metrics = self.aggregate_metrics(epoch_metrics, minibatch_time,
                                                                       predictions, data['ground_truth'], mode)
 
-            # Log minibatch metrics to tensorboard during training
+            # Log minibatch metrics to wandb during training
             if mode == 'train':
-                self.log_tensorboard_train(minibatch_metrics)
+                self.log_wandb_train(minibatch_metrics)
 
             # Display metrics at a predefined frequency
             if i % self.log_period == self.log_period - 1:
                 self.print_metrics(epoch_metrics, dl, mode)
 
-        # Log val metrics for the complete epoch to tensorboard
+        # Log val metrics for the complete epoch to wandb
         if mode == 'val':
-            self.log_tensorboard_val(epoch_metrics)
+            self.log_wandb_val(epoch_metrics)
 
         return epoch_metrics
 
@@ -278,19 +287,29 @@ class Trainer:
             'min_val_metric': self.min_val_metric
         }, checkpoint_path)
 
-    def log_tensorboard_train(self, minibatch_metrics: Dict):
+    def log_wandb_train(self, minibatch_metrics: Dict):
         """
         Logs minibatch metrics during training
         """
-        for metric_name, metric_val in minibatch_metrics.items():
-            self.writer.add_scalar('train/' + metric_name, metric_val, self.tb_iters)
-        self.tb_iters += 1
+        if wandb.run is None: return # if wandb is not initialized, we don't log
+        logging_dict = {"training_step":self.training_iter}
 
-    def log_tensorboard_val(self, epoch_metrics):
+        for metric_name, metric_val in minibatch_metrics.items():
+            logging_dict['train/{}'.format(metric_name)] = metric_val
+        wandb.log(logging_dict)
+
+        self.training_iter += 1
+
+    def log_wandb_val(self, epoch_metrics):
         """
         Logs epoch metrics for validation set
         """
+        if wandb.run is None: return # if wandb is not initialized, we don't log
+        logging_dict = {"training_step":self.training_iter}
+
         for metric_name, metric_val in epoch_metrics.items():
             if metric_name != 'minibatch_count' and metric_name != 'time_elapsed':
                 metric_val /= epoch_metrics['minibatch_count']
-                self.writer.add_scalar('val/' + metric_name, metric_val, self.tb_iters)
+                logging_dict['val/{}'.format(metric_name)] = metric_val
+        
+        wandb.log(logging_dict)

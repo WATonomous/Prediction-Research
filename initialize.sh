@@ -24,3 +24,5 @@ echo "WANDB_MODE=${WANDB_MODE}" >> ".env"
 if [ $WANDB_MODE == "online" ]; then
     echo "WANDB_KEY=${key}" >> ".env"
 fi
+
+echo "Initialized, please restart your containers if changes were made."
