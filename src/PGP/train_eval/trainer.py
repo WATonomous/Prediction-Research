@@ -32,7 +32,7 @@ class Trainer:
         # Intialize wandb
         wandb.init(
             project="prediction-pgp",
-            name=cfg.experiment_name,
+            name=cfg['experiment_name'],
             config=cfg
         )
         # I define a custom step here because global step can get confusing
@@ -292,7 +292,7 @@ class Trainer:
         Logs minibatch metrics during training
         """
         if wandb.run is None: return # if wandb is not initialized, we don't log
-        logging_dict = {"training_step":self.training_iter}
+        logging_dict = {"train_step":self.training_iter}
 
         for metric_name, metric_val in minibatch_metrics.items():
             logging_dict['train/{}'.format(metric_name)] = metric_val
@@ -305,7 +305,7 @@ class Trainer:
         Logs epoch metrics for validation set
         """
         if wandb.run is None: return # if wandb is not initialized, we don't log
-        logging_dict = {"training_step":self.training_iter}
+        logging_dict = {"train_step":self.training_iter}
 
         for metric_name, metric_val in epoch_metrics.items():
             if metric_name != 'minibatch_count' and metric_name != 'time_elapsed':

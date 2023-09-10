@@ -17,4 +17,4 @@ USER=docker && \
     chown root:root /usr/local/bin/fixuid && \                                                                              
     chmod 4755 /usr/local/bin/fixuid && \
     mkdir -p /etc/fixuid && \                                                                                               
-    printf "user: $USER\ngroup: $GROUP\npaths:\n  - /home/docker/" > /etc/fixuid/config.yml
+    printf "user: $USER\ngroup: $GROUP\npaths:\n  - /home/docker/ \n  - /tmp/" > /etc/fixuid/config.yml
