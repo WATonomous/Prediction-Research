@@ -69,6 +69,3 @@ services:
           - driver: nvidia
             device_ids: ['0'] # Change to ['0', '1'] to use two GPUs
             capabilities: [gpu]
-
-  
-            
