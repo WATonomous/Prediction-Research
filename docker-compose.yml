@@ -4,6 +4,9 @@ services:
     build:
       context: .
       dockerfile: docker/hyrsm/Dockerfile
+      args:
+        USER_WANDB_MODE: ${WANDB_MODE:-offline}
+        USER_WANDB_KEY: ${WANDB_KEY:-}
     image: prediction-research/hyrsm
 
     ipc: host
@@ -22,6 +25,9 @@ services:
     build:
       context: .
       dockerfile: docker/hyrsmplusplus/Dockerfile
+      args:
+        USER_WANDB_MODE: ${WANDB_MODE:-offline}
+        USER_WANDB_KEY: ${WANDB_KEY:-}
     image: prediction-research/hyrsmplusplus
 
     ipc: host
@@ -40,6 +46,9 @@ services:
     build:
       context: .
       dockerfile: docker/pgp/Dockerfile
+      args:
+        USER_WANDB_MODE: ${WANDB_MODE:-offline}
+        USER_WANDB_KEY: ${WANDB_KEY:-}
     image: prediction-research/pgp
 
     ipc: host
@@ -60,6 +69,3 @@ services:
           - driver: nvidia
             device_ids: ['0'] # Change to ['0', '1'] to use two GPUs
             capabilities: [gpu]
-
-  
-            

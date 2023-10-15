@@ -24,7 +24,8 @@ RUN pip install \
     psutil \
     positional-encodings==5.0.0 \
     imageio \
-    tensorboard 
+    tensorboard \
+    wandb
     
 RUN pip install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
 
@@ -33,6 +34,13 @@ COPY docker/fixuid_setup.sh /project/fixuid_setup.sh
 RUN /project/fixuid_setup.sh
 USER docker:docker
 WORKDIR /home/docker/
+
+# Weights and Biases login for mlOPs
+ARG USER_WANDB_MODE
+ARG USER_WANDB_KEY
+ENV WANDB_MODE $USER_WANDB_MODE
+
+RUN if [ ! -z $USER_WANDB_KEY ]; then wandb login $USER_WANDB_KEY; fi
 
 ENV DEBIAN_FRONTEND interactive
 

@@ -1,3 +1,6 @@
+# wandb configurations 
+experiment_name: initial_logging_test
+
 # Dataset and dataloader parameters
 dataset: 'nuScenes'
 version: 'v1.0-trainval'
